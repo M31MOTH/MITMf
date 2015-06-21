@@ -29,7 +29,6 @@ from twisted.internet import reactor
 from core.sslstrip.CookieCleaner import CookieCleaner
 from core.sergioproxy.ProxyPlugins import ProxyPlugins
 from core.utils import Banners, SystemConfig, shutdown
-from core.mitmfapi import mitmfapi
 from plugins import *
 
 Banners().printBanner()
@@ -159,13 +158,12 @@ reactor.listenTCP(args.listen, strippingFactory)
 for p in ProxyPlugins.getInstance().plist:
 
     p.pluginReactor(strippingFactory) #we pass the default strippingFactory, so the plugins can use it
+    p.startConfigWatch()
 
     if hasattr(p, 'startThread'):
         t = threading.Thread(name='{}-Thread'.format(p.name), target=p.startThread)
         t.setDaemon(True)
         t.start()
-
-mitmfapi().start()
 
 print "|"
 print "|_ Sergio-Proxy v{} online".format(sergio_version)
@@ -182,14 +180,20 @@ DNSChef.getInstance().start()
 print "|_ DNSChef v{} online".format(DNSChef.version)
 
 #Start the HTTP Server
-#from core.servers.http.HTTPServer import HTTPServer
-#HTTPServer.getInstance().start()
-#print "|_ HTTP server online"
+from core.servers.http.HTTPserver import HTTPserver
+HTTPserver.getInstance().start()
+print "|_ HTTP server online"
 
 #Start the SMB server
 from core.servers.smb.SMBserver import SMBserver
-print "|_ SMB server online [Mode: {}] (Impacket {}) \n".format(SMBserver.getInstance().server_type, SMBserver.getInstance().impacket_ver)
+print "|_ SMB server online [Mode: {}] (Impacket {})".format(SMBserver.getInstance().server_type, SMBserver.getInstance().impacket_ver)
 SMBserver.getInstance().start()
+
+#Start MITMf-API
+from core.mitmfapi import mitmfapi
+mitmfapi().start()
+print "|"
+print "|_ MITMf-API running on http://{}:{}\n".format(mitmfapi.getInstance().host, mitmfapi.getInstance().port)
 
 #start the reactor
 reactor.run()

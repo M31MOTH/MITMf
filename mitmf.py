@@ -180,9 +180,9 @@ DNSChef.getInstance().start()
 print "|_ DNSChef v{} online".format(DNSChef.version)
 
 #Start the HTTP Server
-from core.servers.http.HTTPserver import HTTPserver
-HTTPserver.getInstance().start()
-print "|_ HTTP server online"
+#from core.servers.http.HTTPserver import HTTPserver
+#HTTPserver.getInstance().start()
+#print "|_ HTTP server online"
 
 #Start the SMB server
 from core.servers.smb.SMBserver import SMBserver
